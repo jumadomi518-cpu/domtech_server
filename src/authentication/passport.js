@@ -8,15 +8,15 @@
  const passport = require("passport");
  const LocalStrategy = require("passport-local").Strategy;
 
- passport.use({ usernameField: "email"},
- new LocalStrategy(async (username, password, done) => {
+ passport.use(
+ new LocalStrategy({ usernameField: "email"}, async (email, password, done) => {
   try {
-   const { rows } = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
+   const { rows } = await pool.query("SELECT * FROM users WHERE username = $1", [email]);
    const user = rows[0];
-   const compare = await bcrypt.compare(password, user.password);
- if (!user) {
+  if (!user) {
   return done(null, false);
   }
+   const compare = await bcrypt.compare(password, user.password);
 
  if (!compare) {
  return done(null, false);
