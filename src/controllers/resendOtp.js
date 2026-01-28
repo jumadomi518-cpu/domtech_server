@@ -14,7 +14,7 @@ const axios = require("axios");
  try {
  const email = req.body.email;
  const otp = Math.floor(Math.random() * 900000 + 100000);
- const hashedOtp = bcrypt.hash(otp.toString(), 10);
+ const hashedOtp = await bcrypt.hash(otp.toString(), 10);
  await pool.query("UPDATE users SET otp = $1 WHERE email = $2", [hashedOtp, email]);
 
  const response = await axios.post("https://api.brevo.com/v3/smtp/email", {
