@@ -21,7 +21,7 @@
  async function sendOtp(email) {
 
  const otp = Math.floor(Math.random() * 989989 + 111111);
- saveOtp(otp, email);
+   await saveOtp(otp, email);
 
 
 
@@ -32,13 +32,13 @@
     "https://api.brevo.com/v3/smtp/email",
     {
       sender: { name: "DomTech", email: "domtechpay@gmail.com" },
-      to: [{ email: "jumadomi518@gmail.com" }],
+      to: [{ email: email }],
       subject: "Email Address Verification",
       htmlContent: `<p>Dear Lovely User</p><p>Use the following One Time Password to verify your Email address</p><p><b>OTP:</b> ${otp}</p>`
     },
     {
       headers: {
-        "api-key": process.env.BREVO,
+        "api-key": process.env.BREVO_API_KEY,
         "Content-Type": "application/json"
       }
     }
