@@ -29,11 +29,11 @@
      })
    );
 
-passport.serializeUser(user, done) {
+passport.serializeUser( (user, done) => {
   done(null, user.user_id);
-  }
+  });
 
-passport.deserializeUser(user_id, done) {
+passport.deserializeUser( async (user_id, done) => {
 try {
 const { rows } = await pool.query("SELECT * FROM users WHERE user_id = $1", [user_id]);
 const user = rows[0];
@@ -42,7 +42,7 @@ done(null, user);
  done(err);
 }
 
-}
+});
 
 
 module.exports = passport;
