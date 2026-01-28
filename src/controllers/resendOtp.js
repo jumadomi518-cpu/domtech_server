@@ -12,7 +12,6 @@ const axios = require("axios");
 
  async function resendOtp(req, res) {
  try {
-const email = req.body.email;
  const email = req.body.email;
  const otp = Math.floor(Math.random() * 900000 + 100000);
  const hashedOtp = bcrypt.hash(otp, 10);
