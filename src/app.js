@@ -20,9 +20,9 @@
  const passport = require("./authentication/passport.js");
  app.use(passport.session());
  const loginRouter = require("./routes/loginRouter.js");
+ const locationsRouter = require("./routes/locations.js");
 
-
-
+ app.use("/", locationsRouter);
  app.use("/register", registerRouter);
  app.use("/login", loginRouter);
 
