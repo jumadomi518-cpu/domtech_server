@@ -28,6 +28,14 @@ const CryptoJS = require("crypto-js");
 }
 
 
+ paymentRouter.post("/mpesa-callback", (req, res) => {
+   console.log(req.body);
+   res.status(200).json({
+      ResultCode: 0,
+     ResultDesc: "Accepted"
+    });
+   });
+
  paymentRouter.post("/:id", async (req, res) => {
   try {
  const date = new Date();
@@ -61,12 +69,6 @@ const CryptoJS = require("crypto-js");
  }
   });
 
- paymentRouter.post("/mpesa-callback", (req, res) => {
-  console.log(req.body);
-  res.status(200).json({
-   ResultCode: 0,
-   ResultDesc: "Accepted"
-    });
-   });
+
 
  module.exports = paymentRouter;
