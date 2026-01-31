@@ -14,7 +14,7 @@
  if (rows.length > 0) {
  return "user exists";
  }
- await pool.query("INSERT INTO users (name, phone, email, password) VALUES ($1, $2, $3, $4)", [ name, phone, email, hashedPassword]);
+ await pool.query("INSERT INTO users (name, phone, email, password, status) VALUES ($1, $2, $3, $4, $5)", [ name, phone, email, hashedPassword, "unverified"]);
  return "user added successfully";
  }
 

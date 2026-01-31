@@ -10,6 +10,9 @@
  async function verifyOtp(email, otp) {
    const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
    const user = rows[0];
+   if (Date.now() > user.expires_at) {
+    return "Otp expired";
+    }
    const compare = bcrypt.compare(otp, user.otp);
    return compare;
     }
@@ -20,7 +23,12 @@
  try {
  const verified = await verifyOtp(req.body.email, req.body.otp);
  if (verified) {
+ await pool.query("UPDATE users SET status = $1 WHERE email = $2", ["verified", req.body.email]);
  return res.json({status: "success"});
+  }
+
+ if (verified === "Otp expired") {
+ return res.json({status: "Otp expired"});
   }
  return res.json({status: "don't match"});
 

@@ -29,16 +29,18 @@ locationsRouter.post("/add-location", async (req, res) => {
 
  const client = await pool.connect();
   try {
-  const { name, latitude, longitude, shortCode, consumerKey, consumerSecret, passKey } = req.body;
+  const { name, latitude, longitude, shortCode, transactionType, accountRefference, consumerKey, consumerSecret, passKey } = req.body;
  await client.query("BEGIN");
  const locationResult = await client.query("INSERT INTO locations (location_name, latitude, longitude) VALUES ($1, $2, $3) RETURNING location_id", [ name, latitude, longitude ]);
 const locationId = locationResult.rows[0].location_id;
-await client.query("INSERT INTO secrets (location_id, short_code, consumer_key, consumer_secret, pass_key) VALUES ($1, $2, $3, $4, $5)", [
+await client.query("INSERT INTO secrets (location_id, short_code, consumer_key, consumer_secret, pass_key, transaction_type, account_ref) VALUES ($1, $2, $3, $4, $5, $6, $7)", [
     locationId,
     shortCode,
     encrypt(consumerKey),
     encrypt(consumerSecret),
-    encrypt(passKey)
+    encrypt(passKey),
+    transactionType,
+    accountRefference
    ]);
  await client.query("COMMIT");
  res.json({ status: "success"});
