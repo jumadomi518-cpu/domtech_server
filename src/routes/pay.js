@@ -62,8 +62,7 @@ const CryptoJS = require("crypto-js");
   });
 
  paymentRouter.post("/mpesa-callback", (req, res) => {
-  const callback = req.body;
-  console.log(callback);
+  console.log(req.body);
   res.status(200).json({
    ResultCode: 0,
    ResultDesc: "Accepted"

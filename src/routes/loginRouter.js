@@ -7,7 +7,7 @@
 
 
  loginRouter.post("/", passport.authenticate('local'), (req, res) => {
-   res.json({ status: "success"});
+   res.json({ status: "success", user: req.user});
    });
 
 
