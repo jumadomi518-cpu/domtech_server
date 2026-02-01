@@ -9,11 +9,12 @@
  });
 const CryptoJS = require("crypto-js");
 
+
  const accessTokens = {};
  async function getToken(id, consumerKey, consumerSecret) {
 
   if (accessTokens[id] &&  Date.now() <= accessTokens[id].tokenExpiry) {
-    return accessTokens[id].acessToken;
+    return accessTokens[id].accessToken;
    }
  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
   const res = await axios.get("https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", {
@@ -28,13 +29,91 @@ const CryptoJS = require("crypto-js");
 }
 
 
- paymentRouter.post("/mpesa-callback", (req, res) => {
-   console.log(req.body);
-   res.status(200).json({
+
+ paymentRouter.post("/mpesa-callback", async (req, res) => {
+  try {
+    const callback = req.body?.Body?.stkCallback;
+
+    if (!callback) {
+      return res.sendStatus(400);
+    }
+
+    const checkoutRequestId = callback.CheckoutRequestID;
+    const resultCode = callback.ResultCode;
+
+    let receipt = null;
+
+    if (resultCode === 0) {
+      const items = callback.CallbackMetadata?.Item || [];
+      receipt = items.find(i => i.Name === "MpesaReceiptNumber")?.Value;
+
+      await pool.query(
+        `UPDATE mpesa_transactions
+         SET status = $1, mpesa_receipt_number = $2, result_desc = $3
+         WHERE checkout_request_id = $4
+           AND status = 'PENDING'`,
+        ["SUCCESS", receipt, callback.ResultDesc, checkoutRequestId]
+      );
+    } else {
+      await pool.query(
+        `UPDATE mpesa_transactions
+         SET status = $1, result_desc = $2
+         WHERE checkout_request_id = $3
+           AND status = 'PENDING'`,
+        ["FAILED", callback.ResultDesc, checkoutRequestId]
+      );
+    }
+    res.status(200).json({
       ResultCode: 0,
-     ResultDesc: "Accepted"
+      ResultDesc: "Accepted"
     });
-   });
+
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
+
+
+
+
+  paymentRouter.get("/:CheckoutRequestID/status", async (req, res) => {
+  try {
+    const { CheckoutRequestID } = req.params;
+
+    const result = await pool.query(
+      `SELECT status, mpesa_receipt_number, result_desc
+       FROM mpesa_transactions
+       WHERE checkout_request_id = $1`,
+      [CheckoutRequestID]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        message: "Payment not found"
+      });
+    }
+
+    const payment = result.rows[0];
+
+    res.status(200).json({
+      status: payment.status,
+      receipt: payment.mpesa_receipt_number,
+      description: payment.result_desc
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
+});
+
+
+
+
 
  paymentRouter.post("/:id", async (req, res) => {
   try {
@@ -63,6 +142,7 @@ const CryptoJS = require("crypto-js");
  const stkRes = await axios.post("https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest", payload, {
   headers: { "Authorization": `Bearer ${accessToken}`}
    });
+ await pool.query("INSERT INTO mpesa_transactions (location_id, checkout_request_id, merchant_request_id, phone, amount) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (checkout_request_id) DO NOTHING", [req.params.id, stkRes.data.CheckoutRequestID, stkRes.data.MerchantRequestID, req.body.phone, req.body.amount]);
  res.json(stkRes.data);
  } catch (err) {
   res.status(500).json({ status: "an error occured", error: err.message});
