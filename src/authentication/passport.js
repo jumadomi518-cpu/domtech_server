@@ -14,12 +14,12 @@
    const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
    const user = rows[0];
   if (!user) {
-  return done(null, false);
+  return done(null, false, { message: "The user with the email does not exist"});
   }
    const compare = await bcrypt.compare(password, user.password);
 
  if (!compare) {
- return done(null, false);
+ return done(null, false, { message: "Incorrect password"});
   }
  return done(null, user);
  } catch (err) {

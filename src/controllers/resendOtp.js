@@ -13,9 +13,10 @@ const axios = require("axios");
  async function resendOtp(req, res) {
  try {
  const email = req.body.email;
+ const time = Date.now() + 5 * 60 * 1000;
  const otp = Math.floor(Math.random() * 900000 + 100000);
  const hashedOtp = await bcrypt.hash(otp.toString(), 10);
- await pool.query("UPDATE users SET otp = $1 WHERE email = $2", [hashedOtp, email]);
+ await pool.query("UPDATE users SET otp = $1, expires_at = $2 WHERE email = $3", [hashedOtp, time, email]);
 
  const response = await axios.post("https://api.brevo.com/v3/smtp/email", {
    sender: { email: "domtechpay@gmail.com", name: "DomTech"},
