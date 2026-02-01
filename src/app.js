@@ -47,7 +47,8 @@
  app.use("/pay", paymentRouter);
  app.get("/profile", async (req, res) => {
   try {
-
+    console.log("session", req.session);
+    console.log("user", req.user);
     if (!req.user) {
     return res.status(500).json({ message: "Not logged in"});
        }
