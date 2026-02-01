@@ -30,8 +30,6 @@
  app.use(express.urlencoded({ extended: true}));
  app.use(express.json());
 
- app.use(passport.initialize());
- app.use(passport.session());
 
  const registerRouter = require('./routes/registerRouter.js');
  const passport = require("./authentication/passport.js");
