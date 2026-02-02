@@ -31,15 +31,32 @@
  app.use("/pay", paymentRouter);
 
 
-app.post("/status", async (req, user) => {
+app.post("/status", async (req, res) => {
   try {
- const { rows } = await pool.query("SELECT status FROM users WHERE email = $1", [req.body.email]);
- const status = rows[0];
- res.json(status);
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const { rows } = await pool.query(
+      'SELECT status FROM users WHERE email = $1',
+      [email]
+    );
+
+    const status = rows[0];
+
+    if (!status) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(status);
   } catch (err) {
- res.status(500).json({ message: "an error occured", error: err.message});
-}
-  })
+    console.error(err);
+    res.status(500).json({ message: "An error occurred", error: err.message });
+  }
+});
+
 
 app.get("/profile", authenticateToken, (req, res) => {
   return res.status(200).json(req.user);
