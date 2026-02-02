@@ -12,10 +12,6 @@
   });
 
 
-
-app.use(cors({ origin: "http://localhost:7700", credentials: true, allowedHeaders: ["Content-Type", "Authorization"]}));
-
-
  app.use(session({
   secret: process.env.SECRET,
   resave: false,
