@@ -11,6 +11,8 @@
   ssl: { rejectUnauthorized: false }
   });
 
+ app.set("trust proxy", 1);
+
  app.use(session({
   store: new pgSession({
    pool,
@@ -31,12 +33,12 @@
  app.use(express.json());
 
 
- const registerRouter = require('./routes/registerRouter.js');
  const passport = require("./authentication/passport.js");
 
  app.use(passport.initialize());
  app.use(passport.session());
 
+ const registerRouter = require('./routes/registerRouter.js');
  const loginRouter = require("./routes/loginRouter.js");
  const locationsRouter = require("./routes/locations.js");
  const paymentRouter = require("./routes/pay.js");
