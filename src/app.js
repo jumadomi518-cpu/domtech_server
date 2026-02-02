@@ -11,13 +11,12 @@
   ssl: { rejectUnauthorized: false }
   });
 
-
+ app.use(cors({ origin: "http://localhost:7700"}));
  app.use(session({
   secret: process.env.SECRET,
   resave: false,
   saveUninitialized: false
   }));
-
 
  app.use(express.urlencoded({ extended: true}));
  app.use(express.json());
