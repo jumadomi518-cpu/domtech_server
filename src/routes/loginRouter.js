@@ -44,6 +44,8 @@ const pool = new Pool({
     const token = jwt.sign(
       {
         user_id: user.user_id,
+        name: user.name,
+        phone: user.phone,
         email: user.email
       },
       process.env.SECRET,
