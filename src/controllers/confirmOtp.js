@@ -8,14 +8,17 @@
   });
 
  async function verifyOtp(email, otp) {
-   const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-   const user = rows[0];
-   if (Date.now() > user.expires_at) {
+  const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  const user = rows[0];
+  if (!user) {
+    return "User not found";
+  }
+  if (Date.now() > new Date(user.expires_at).getTime()) {
     return "Otp expired";
-    }
-   const compare = bcrypt.compare(otp, user.otp);
-   return compare;
-    }
+  }
+  const compare = await bcrypt.compare(otp, user.otp);
+  return compare;
+}
 
 
 
