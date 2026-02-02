@@ -13,7 +13,7 @@
 
 
 
-app.use(cors({ origin: "http://localhost:7700", credentials: true}));
+app.use(cors({ origin: "http://localhost:7700", credentials: true, allowedHeaders: ["Content-Type", "Authorization"]}));
 
 
  app.use(session({
