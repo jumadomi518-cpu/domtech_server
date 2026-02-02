@@ -56,12 +56,6 @@ app.use(cors({ origin: "http://localhost:7700", credentials: true}));
     console.log("session", req.session);
     console.log("user", req.user);
 
-  res.json({
-    cookie: req.headers.cookie,
-    session: req.session,
-    passport: req.session?.passport,
-    user: req.user
-  });
     if (!req.user) {
     return res.status(500).json({ message: "Not logged in"});
        }
