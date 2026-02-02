@@ -46,7 +46,8 @@ const pool = new Pool({
         user_id: user.user_id,
         name: user.name,
         phone: user.phone,
-        email: user.email
+        email: user.email,
+        role: user.role
       },
       process.env.SECRET,
       { expiresIn: "30d" }
