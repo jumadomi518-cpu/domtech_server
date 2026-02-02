@@ -4,7 +4,11 @@
  const express = require("express");
  const app = express();
 
-
+ const { Pool } = require("pg");
+ const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false}
+   });
 
  app.use(cors({ origin: "http://localhost:7700"}));
 
@@ -26,6 +30,16 @@
  app.use("/login", loginRouter);
  app.use("/pay", paymentRouter);
 
+
+app.post("/status", async (req, user) => {
+  try {
+ const { rows } = await pool.query("SELECT status FROM users WHERE email = $1", [req.body.email]);
+ const status = rows[0];
+ res.json(status);
+  } catch (err) {
+ res.status(500).json({ message: "an error occured", error: err.message});
+}
+  })
 
 app.get("/profile", authenticateToken, (req, res) => {
   return res.status(200).json(req.user);
