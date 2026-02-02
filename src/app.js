@@ -12,9 +12,9 @@
  app.use(express.urlencoded({ extended: true}));
  app.use(express.json());
 
- const passport = require("./authentication/passport.js");
+
  const authenticateToken = require("./authentication/json.js");
- app.use(passport.initialize());
+
 
  const registerRouter = require('./routes/registerRouter.js');
  const loginRouter = require("./routes/loginRouter.js");

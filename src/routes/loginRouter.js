@@ -1,25 +1,64 @@
-const { Router } = require("express");
-const loginRouter = Router();
-const passport = require("../authentication/passport.js");
+
+
+  const express = require("express");
+const loginRouter = express.Router();
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { Pool } = require("pg");
 
-loginRouter.post("/", (req, res, next) => {
-  passport.authenticate("local", { session: false }, (err, user, info) => {
-    if (err) return res.status(500).json({ message: "Server error" });
-    if (!user) return res.status(401).json({ success: false, message: info.message });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-    const token = jwt.sign(
-      { userId: user.user_id, name: user.name, phone: user.phone, email: user.email },
-      process.env.SECRET,
-      { expiresIn: '30d' }
+ loginRouter.post("/", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password required" });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
     );
 
-    return res.status(200).json({
+    if (!rows.length) {
+      return res.status(401).json({
+        success: false,
+        message: "User with this email does not exist"
+      });
+    }
+
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect password"
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        user_id: user.user_id,
+        email: user.email
+      },
+      process.env.SECRET,
+      { expiresIn: "30d" }
+    );
+
+    return res.json({
       success: true,
-      message: "Login successful",
       token
     });
-  })(req, res, next);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = loginRouter;
