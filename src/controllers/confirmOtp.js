@@ -23,22 +23,23 @@
 
 
  async function confirmOtp(req, res) {
- try {
- const verified = await verifyOtp(req.body.email, req.body.otp);
- if (verified) {
- await pool.query("UPDATE users SET status = $1 WHERE email = $2", ["verified", req.body.email]);
- return res.json({status: "success"});
+  try {
+    const { email, otp } = req.body;
+
+    const verified = await verifyOtp(email, otp);
+
+    if (verified === "Otp expired") return res.status(400).json({ status: "Otp expired" });
+    if (verified === "User not found") return res.status(404).json({ status: "User not found" });
+    if (verified === true) {
+      await pool.query("UPDATE users SET status = $1 WHERE email = $2", ["verified", email]);
+      return res.json({ status: "success" });
+    }
+
+    return res.status(400).json({ status: "don't match" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: "internal server error", error: err.message });
   }
-
- if (verified === "Otp expired") {
- return res.json({status: "Otp expired"});
-  }
- return res.json({status: "don't match"});
-
- } catch(err) {
-  return res.json({status: "internal server error"});
-   }
-
- }
+}
 
 module.exports = confirmOtp;
