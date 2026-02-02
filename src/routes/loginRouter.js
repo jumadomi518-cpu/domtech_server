@@ -4,7 +4,7 @@ const passport = require("../authentication/passport.js");
 const jwt = require("jsonwebtoken");
 
 loginRouter.post("/", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
+  passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err) return res.status(500).json({ message: "Server error" });
     if (!user) return res.status(401).json({ success: false, message: info.message });
 

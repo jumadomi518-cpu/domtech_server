@@ -3,24 +3,18 @@
  const cors = require("cors");
  const express = require("express");
  const app = express();
- const session = require("express-session");
+
 
 
  app.use(cors({ origin: "http://localhost:7700"}));
- app.use(session({
-  secret: process.env.SECRET,
-  resave: false,
-  saveUninitialized: false
-  }));
+
 
  app.use(express.urlencoded({ extended: true}));
  app.use(express.json());
 
 
- const passport = require("./authentication/passport.js");
  const authenticateToken = require("./authentication/json.js");
  app.use(passport.initialize());
- app.use(passport.session());
 
  const registerRouter = require('./routes/registerRouter.js');
  const loginRouter = require("./routes/loginRouter.js");
