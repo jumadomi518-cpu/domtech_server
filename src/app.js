@@ -4,12 +4,7 @@
  const express = require("express");
  const app = express();
  const session = require("express-session");
- const pgSession = require("connect-pg-simple")(session);
- const { Pool } = require("pg");
- const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-  });
+
 
  app.use(cors({ origin: "http://localhost:7700"}));
  app.use(session({
@@ -36,16 +31,17 @@
  app.use("/register", registerRouter);
  app.use("/login", loginRouter);
  app.use("/pay", paymentRouter);
- app.get("/profile", authenticateToken, (req, res) => {
-  try {
-    console.log("user", req.user);
 
-    if (!req.user) {
-    return res.status(500).json({ message: "Not logged in"});
-       }
-    return res.status(200).json(req.user);
-        } catch (err) {
-    return res.status(500).json({ message: "an error occured"});
-        }
-     });
+
+app.get("/profile", authenticateToken, (req, res) => {
+  return res.status(200).json(req.user);
+});
+
+
+
+
  app.listen(process.env.PORT || 3000, () => console.log("server running at port 3000"));
+
+
+
+
