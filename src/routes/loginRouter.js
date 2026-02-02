@@ -28,7 +28,7 @@
 
      success: true,
      message: "Login successful",
-     user
+     userInfo: { name: user.name, phone: user.phone, email: user.email, role: user.role }
 
           });
         });

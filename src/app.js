@@ -13,6 +13,9 @@
 
  app.set("trust proxy", 1);
 
+app.use(cors({ origin: "http://localhost:7700", credentials: true}));
+
+
  app.use(session({
   store: new pgSession({
    pool,
@@ -23,12 +26,13 @@
   resave: false,
   saveUninitialized: false,
  cookie: {
-  maxAge: 30 * 24 * 60 * 60 * 1000
+  maxAge: 30 * 24 * 60 * 60 * 1000,
+  secure: true,
+  sameSite: 'lax'
    }
   }));
 
 
- app.use(cors({ origin: "http://localhost:7700", credentials: true}));
  app.use(express.urlencoded({ extended: true}));
  app.use(express.json());
 
@@ -51,6 +55,13 @@
   try {
     console.log("session", req.session);
     console.log("user", req.user);
+
+  res.json({
+    cookie: req.headers.cookie,
+    session: req.session,
+    passport: req.session?.passport,
+    user: req.user
+  });
     if (!req.user) {
     return res.status(500).json({ message: "Not logged in"});
        }
