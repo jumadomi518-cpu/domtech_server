@@ -11,25 +11,15 @@
   ssl: { rejectUnauthorized: false }
   });
 
- app.set("trust proxy", 1);
+
 
 app.use(cors({ origin: "http://localhost:7700", credentials: true}));
 
 
  app.use(session({
-  store: new pgSession({
-   pool,
-   tableName: "session",
-   createTableIfNotExist: true
-    }),
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: false,
- cookie: {
-  maxAge: 30 * 24 * 60 * 60 * 1000,
-  secure: true,
-  sameSite: 'lax'
-   }
+  saveUninitialized: false
   }));
 
 
@@ -38,7 +28,7 @@ app.use(cors({ origin: "http://localhost:7700", credentials: true}));
 
 
  const passport = require("./authentication/passport.js");
-
+ const authenticateToken = require("./authentication/json.js");
  app.use(passport.initialize());
  app.use(passport.session());
 
@@ -51,16 +41,14 @@ app.use(cors({ origin: "http://localhost:7700", credentials: true}));
  app.use("/register", registerRouter);
  app.use("/login", loginRouter);
  app.use("/pay", paymentRouter);
- app.get("/profile", async (req, res) => {
+ app.get("/profile", authenticateToken, (req, res) => {
   try {
-    console.log("session", req.session);
     console.log("user", req.user);
 
     if (!req.user) {
     return res.status(500).json({ message: "Not logged in"});
        }
-   const { rows } = await pool.query("SELECT name, phone, email FROM users WHERE user_id = $1", [req.user.user_id]);
-    return res.status(200).json(rows[0]);
+    return res.status(200).json(req.user);
         } catch (err) {
     return res.status(500).json({ message: "an error occured"});
         }
