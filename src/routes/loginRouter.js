@@ -47,6 +47,7 @@ const pool = new Pool({
         name: user.name,
         phone: user.phone,
         email: user.email,
+        status: user.status,
         role: user.role
       },
       process.env.SECRET,
@@ -55,6 +56,7 @@ const pool = new Pool({
 
     return res.json({
       success: true,
+      phone: user.phone,
       token
     });
 
