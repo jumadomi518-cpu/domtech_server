@@ -10,7 +10,7 @@
   ssl: { rejectUnauthorized: false}
    });
 
- app.use(cors({ origin: "https://domtech-tsc1.vercel.app/"}));
+ app.use(cors({ origin: "http://localhost:7700/"}));
 
 
  app.use(express.urlencoded({ extended: true}));
